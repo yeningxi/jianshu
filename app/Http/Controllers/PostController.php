@@ -4,12 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Post;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class PostController extends Controller
 {
     //
     public function index(){
 
+//        测试日志服务容器
+        $app = app();
+        $log = $app->make('log');
+        //dd($log);
+        //$log->info('index_log',['title'=>'abc']);//写入storage/logs/laravel.log里边
         $posts = Post::orderby('id','desc')->paginate(6);
 
         return view('post/index',compact('posts'));
@@ -32,8 +38,11 @@ class PostController extends Controller
            'title'=>'required|max:30|unique:posts,title',
            'content' => 'required'
         ]);
-
-        $post = Post::create(\request(['title','content']));
+        $user_id = Auth::id();
+        //dd(compact('user_id'));
+        $parm = array_merge(request(['title','content']),compact('user_id'));
+        //dd($parm);
+        Post::create($parm);
 
         return redirect('posts');
 
@@ -52,7 +61,7 @@ class PostController extends Controller
             'title'=>'required|max:30',
             'content' => 'required'
         ]);
-
+        $this->authorize('update',$post);
         $post->title = request('title');
         $post->content = request('content');
         $post->save();
@@ -61,6 +70,7 @@ class PostController extends Controller
 
     public function delete(Post $post){
 
+        $this->authorize('delete',$post);
         $post->delete();
         return redirect('/posts');
     }

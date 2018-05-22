@@ -14,6 +14,20 @@
 //Route::get('/', function () {
 //    return view('welcome');
 //});
+//用户注册
+Route::get('/register','RegisterController@index');
+Route::post('/register','RegisterController@register');
+//用户登录
+Route::get('/login', 'LoginController@index');
+Route::post('/login','LoginController@login');
+Route::get('/logout','LoginController@logout');
+
+//个人设置
+Route::get('/user/me/setting','UserController@setting');
+Route::post('/user/me/setting','UserController@settingstore');
+
+
+
 
 //文章列表
 Route::get('posts', 'PostController@index');
