@@ -50,3 +50,10 @@ Route::get('posts/{post}/delete', 'PostController@delete');
 
 //图片上传
 Route::post('posts/image/upload','PostController@imgUpLoad');
+
+//评论
+Route::post('posts/{post}/comment', 'PostController@comment');
+
+//赞
+Route::get('posts/{post}/zan','PostController@zan');
+Route::get('posts/{post}/unzan','PostController@unzan');

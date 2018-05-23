@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Comment;
 use App\Post;
+use App\Zan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -12,17 +14,18 @@ class PostController extends Controller
     public function index(){
 
 //        测试日志服务容器
-        $app = app();
-        $log = $app->make('log');
+        //$app = app();
+        //$log = $app->make('log');
         //dd($log);
         //$log->info('index_log',['title'=>'abc']);//写入storage/logs/laravel.log里边
-        $posts = Post::orderby('id','desc')->paginate(6);
+        $posts = Post::orderby('id','desc')->withCount(['zans','comment'])->paginate(6);
 
         return view('post/index',compact('posts'));
     }
 
     public function show(Post $post){
 
+        $post->load('comment');
         return view('post/show',compact('post'));
     }
 
@@ -82,6 +85,38 @@ class PostController extends Controller
         //dd($path);
         return asset('storage/'.$path);
     }
+
+    //评论
+    public function comment(Post $post){
+        $this->validate(\request(),[
+            'content'=>'required|min:3'
+        ]);
+
+        $comment = new Comment();
+
+        $comment->post_id = $post->id;
+        $comment->user_id = Auth::id();
+        $comment->content = request('content');
+        //dd($post->comment());
+        $post->comment()->save($comment);
+
+        return back();
+
+    }
+
+
+    public function zan(Post $post){
+        $user_id = Auth::id();
+        $post_id = $post->id;
+        Zan::firstOrCreate(compact('user_id','post_id'));
+        return back();
+    }
+
+    public function unzan(Post $post){
+        $post->zan(Auth::id())->delete();
+        return back();
+    }
+
 
 
 }
